@@ -1,0 +1,7 @@
+<script>
+var station = $.ajax({ type: "GET",   
+                        url: "station.php",   
+                        async: false
+                      }).responseText;
+//var test2 = document.write(response);
+</script>
