@@ -1,0 +1,127 @@
+<?php
+$replace = date("YmdH00", strtotime('-2 hour'));
+$myString = 'http://www.ogimet.com/cgi-bin/getsynop?begin=201601072100&state=Pol&lang=eng';
+$myNewString = str_replace('201601072100',$replace, $myString); //wklejam aktualna data (w sumie minus 2h)
+///////////////////////////USTAWIENIE SEPARATORA DLA POJEDYNCZEJ DEPESZY//////////////////////////////
+
+
+
+
+$stacje_all = file_get_contents($myNewString);
+$stacje1 = explode("=", $stacje_all);
+$stacje3= $stacje1[0];
+$stacje = explode(" ",($stacje3)); #podział na grupy z depeszy
+//echo $stacje3;
+//---------------------------------------------------PODSTAWOWE INFORMACJE Z DEPESZY---------------------------------------
+echo "<strong><font color='#ffcccc'>Kołobrzeg</font></strong>";
+echo '<br/>';
+$dzień = substr($stacje[1], 0, 2);
+$godzina = substr($stacje[1], 2, 2);
+$prędkość_wiatru_anemo =substr($stacje[1], 4, 1);
+echo "<strong><font color='#A0CFEC'>Dzień miesiąca </font></strong>" . $dzień;
+echo '<br/>';
+echo "<strong><font color='#A0CFEC'>Godzina </font></strong>" . $godzina;
+echo '<br/>';
+//-----------------------------------------------------TYP STACJI----------------------------------------------------
+$typ_stacji = substr($stacje[2], 1, 1);
+echo ("<strong><font color='#A0CFEC'>Typ stacji: </font></strong>");
+if ($typ_stacji  == 1){
+   echo "stacja niezautomatyzowana, uwzględniona sekcja 7 " ;
+} else if ($typ_stacji == 2){
+	echo "stacja niezautomatyzowana, opuszczona sekcja 7 (brak informacji do przekazania) ";
+} else if ($typ_stacji == 3){
+	echo "stacja niezautomatyzowana, opuszczona sekcja 7 (brak danych) ";
+} else if ($typ_stacji == 4){
+	echo "stacja automatyczna, uwzględniona sekcja 7 ";
+} else if ($typ_stacji == 5){
+	echo "stacja automatyczna, opuszczona sekcja 7 (brak informacji do przekazania)";
+} else if ($typ_stacji == 6){
+	echo "stacja automatyczna, opuszczona sekcja 7 (brak danych)";
+} else {
+    echo "Brak Danych";
+	};
+echo '<br/>';
+//--------------------------------------------------ZNAK I TEMPERATURA-------------------------------------------------
+//echo "<stong><font color='green'>Temperatura</font></b>" . $stacje[5]. "<br/>";
+$filtr = $stacje[5]."<br/>"; #wybór piątej grupy
+//echo $filtr;
+echo ("<strong><font color='#00FFFF'>Temperatura powietrzna </font></strong>");
+$znak = substr($filtr, 1, 1) ;
+$temper_cyfry = substr($filtr,2,1);
+$temper2 = substr($filtr, 2, 2);
+$temper3 = substr($filtr, 4, 1);
+$temper4 = substr($filtr, 3, 1);
+ if ($znak == 0) { echo "+"; } else {
+    echo "-\n";
+};
+if ($temper_cyfry  == 0){
+   echo $temper4,",", $temper3 ," [&degC]";
+} else {
+   echo $temper2,",", $temper3 ," [&degC]";
+};
+echo '<br/>';
+
+//------------------------------------------WILGOTNOŚĆ PUNKT ROSY - DEW POINT TD------------------------------
+//echo "<b><strong><font color='blue'>Wilgotność</font></strong></b>" . $stacje[6]. "<br/>";
+echo "<strong><font color='#00FFFF'>Temperatura punktu rosy </font></strong>";
+$filtr_td = $stacje[6]."<br/>";
+$znak_td = substr($filtr_td, 1, 1) ;
+ if ($znak_td == 0) { echo "+"; } else {
+    echo "-\n";
+};
+$temper2td = substr($filtr_td, 3, 1);
+$temper3td = substr($filtr_td, 4, 1);
+echo $temper2td,",", $temper3td ," [&degC]";
+echo '<br/>';
+
+
+
+///////////////-------------CZY MAMY INFORMACJE CZY WYSTĄPIŁY OPADY I AKTUALNY STAN POGODY [DANE KODUJE SIĘ W JEDNEJ GRUPIE (JEDNYM [])w tej samej grupie jedna moze byc druga nie ZALEŻY NA JAKĄ CYFRE SIĘ ROZPOCZYNA
+//echo "<b><font color='blue'>Opady</font></b>" . $stacje[10]. "<br/>";
+
+echo ("<strong><font color='#00FFFF'><b>Opad  [mm] </font></strong>");
+$opad = $stacje[10]."<br/>";
+$czy_opad = substr($opad, 0, 1) ;
+//echo $czy_opad," ? jak 6 to opad";
+
+$znak_opad = substr($filtr_opad, 4, 1) ;
+$opad1 = substr($filtr_opad, 1, 3);
+//echo $opad," [mm]";
+$przeszly = substr($opad, 3, 2);
+//echo $opad," [mm]";
+if ($czy_opad == 6  and  $znak_opad == 1) {
+   echo "za ostatnie 6 godzin ";
+} else if ($czy_opad == 333  and  $znak_opad == 2) { 
+   echo "brak danych ";
+} else if ($czy_opad == 6  and  $znak_opad == 2) { 
+   echo "za ostatnie 12 godzin ";
+} else if ($czy_opad == 6  and  $znak_opad == 3) { 
+   echo "za ostatnie 18 godzin ";
+} else if ($czy_opad == 6  and  $znak_opad == 4) { 
+   echo "za ostatnie 24 godziny ";
+} else if ($czy_opad == 6  and  $znak_opad == 5) {
+   echo "za ostatnią godzinę ";
+} else if ($czy_opad == 6  and  $znak_opad == 6) {
+   echo "za ostatnie 2 godziny ";
+} else if ($czy_opad == 6  and  $znak_opad == 7) {
+   echo "za ostatnie 3 godziny ";
+} else if ($czy_opad == 6  and  $znak_opad == 8) {
+   echo "za ostatnie 9 godzin ";
+} else if ($czy_opad == 6  and  $znak_opad == 9) {
+   echo "za ostatnie 15 godzin ";
+} else if ($czy_opad == 7) {
+   echo "brak danych";
+ } else {
+    echo "Brak danych";
+}; 
+//-------------------------------------------------------CZY MAMY OPAD-------------------------------------------
+$prec = substr($stacje[2], 0, 1);
+//echo ("<b><strong><font color='#64E986'>Opady: </font></strong></b>");
+//if ($prec  == 3){
+  // echo "Opady nie wystąpiły" ;
+//} else if ($cis == 4){
+//	echo " [hPa]";
+//} else {
+//    echo "Nie wykonano pomiaru";
+//	};
+//echo '<br/>';
